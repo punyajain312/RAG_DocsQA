@@ -208,8 +208,8 @@ with st.sidebar:
         )
     else:
         st.markdown(
-            f'<div class="status-row"><div class="dot dot-red"></div>'
-            f'Service offline</div>',
+            '<div class="status-row"><div class="dot dot-red"></div>'
+            'Service offline</div>',
             unsafe_allow_html=True,
         )
         st.markdown(

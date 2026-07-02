@@ -13,7 +13,6 @@ from pathlib import Path
 
 import fitz  # PyMuPDF
 
-
 PAGE_CONTENT: dict[str, dict[int, tuple[str, str]]] = {
     "employee_handbook.pdf": {
         1: (
