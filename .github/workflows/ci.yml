@@ -41,27 +41,39 @@ jobs:
         image: qdrant/qdrant:v1.9.2
         ports:
           - 6333:6333
-        options: >-
-          --health-cmd "curl -f http://localhost:6333/healthz"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Install PyTorch (CPU-only, ~200 MB vs 2 GB CUDA default)
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
       - name: Install dependencies
         run: pip install -r requirements-eval.txt
-      - name: Ingest sample documents
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          QDRANT_HOST: localhost
+
+      - name: Wait for Qdrant
         run: |
-          for pdf in data/*.pdf; do
-            curl -s -X POST http://localhost:8000/ingest -F "file=@$pdf" || true
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:6333/healthz; then
+              echo "Qdrant is ready"
+              exit 0
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
           done
-        continue-on-error: true
+          echo "Qdrant did not become ready"
+          exit 1
+
+      - name: Generate sample documents
+        run: python scripts/create_sample_docs.py
+
+      - name: Ingest sample documents into Qdrant
+        env:
+          QDRANT_HOST: localhost
+        run: python scripts/ingest_docs.py
+
       - name: Run eval suite
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
