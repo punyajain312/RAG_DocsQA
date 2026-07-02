@@ -12,6 +12,7 @@ from app.ingestion.embedder import embed_texts
 from app.ingestion.parser import parse_pdf_bytes
 from app.llm.anthropic_client import AnthropicClient
 from app.llm.base import LLMClient
+from app.llm.groq_client import GroqClient
 from app.llm.ollama_client import OllamaClient
 from app.models import HealthResponse, IngestResponse, QueryRequest, QueryResponse
 from app.query.pipeline import run_query
@@ -29,7 +30,11 @@ _llm_client: LLMClient | None = None
 def _get_llm() -> LLMClient:
     global _llm_client
     if _llm_client is None:
-        if settings.llm_provider == "ollama":
+        if settings.llm_provider == "groq":
+            if not settings.groq_api_key:
+                raise RuntimeError("GROQ_API_KEY is not set (get one free at console.groq.com)")
+            _llm_client = GroqClient(settings.groq_api_key, settings.groq_model)
+        elif settings.llm_provider == "ollama":
             _llm_client = OllamaClient(settings.ollama_base_url, settings.ollama_model)
         else:
             if not settings.anthropic_api_key:

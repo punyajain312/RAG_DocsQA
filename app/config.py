@@ -9,11 +9,15 @@ class Settings(BaseSettings):
     anthropic_api_key: str = Field(default="", env="ANTHROPIC_API_KEY")
     anthropic_model: str = Field(default="claude-sonnet-4-6", env="ANTHROPIC_MODEL")
 
-    # Ollama fallback
+    # Groq (free tier — get key at console.groq.com, no credit card needed)
+    groq_api_key: str = Field(default="", env="GROQ_API_KEY")
+    groq_model: str = Field(default="llama-3.3-70b-versatile", env="GROQ_MODEL")
+
+    # Ollama (fully local, no API key)
     ollama_base_url: str = Field(default="http://localhost:11434", env="OLLAMA_BASE_URL")
     ollama_model: str = Field(default="llama3.2", env="OLLAMA_MODEL")
 
-    # LLM provider: "anthropic" or "ollama"
+    # LLM provider: "anthropic" | "groq" | "ollama"
     llm_provider: str = Field(default="anthropic", env="LLM_PROVIDER")
 
     # Qdrant — set QDRANT_URL for cloud (e.g. Qdrant Cloud), otherwise host:port for local

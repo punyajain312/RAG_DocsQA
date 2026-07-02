@@ -35,7 +35,10 @@ jobs:
     name: Eval Suite
     runs-on: ubuntu-latest
     needs: unit-tests
-    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    # Only runs on main/PR when an LLM key is configured as a repo secret
+    if: |
+      (github.ref == 'refs/heads/main' || github.event_name == 'pull_request') &&
+      (secrets.ANTHROPIC_API_KEY != '' || secrets.GROQ_API_KEY != '')
     services:
       qdrant:
         image: qdrant/qdrant:v1.9.2
@@ -77,6 +80,8 @@ jobs:
       - name: Run eval suite
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          LLM_PROVIDER: ${{ secrets.GROQ_API_KEY != '' && 'groq' || 'anthropic' }}
           QDRANT_HOST: localhost
           EVAL_SAMPLE_SIZE: "10"
         run: pytest eval/test_eval.py -v -m eval --tb=short
