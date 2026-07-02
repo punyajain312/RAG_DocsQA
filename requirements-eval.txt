@@ -1,0 +1,6 @@
+# Evaluation only — not needed to run the API or UI.
+# Install with: pip install -r requirements-eval.txt
+-r requirements.txt
+ragas>=0.1.9
+deepeval>=0.21.0
+datasets>=2.19.0
